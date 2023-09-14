@@ -6,14 +6,26 @@ import { Image, AvtivityIndicator } from 'react-native';
 import Home from './screens/Home';
 import Profile from './screens/Profile';
 import Splash from './screens/Splash';
+import * as Font from 'expo-font';
+import { AppLoading } from 'expo';   
+import { useFonts } from '@expo-google-fonts/karla';   
+import { useFonts as useFonts2 } from '@expo-google-fonts/markazi-text';
 
+      const Stack = createNativeStackNavigator();   
+      
 
-      const Stack = createNativeStackNavigator();
-
-      const App = () => {      
+      export default function App () {      
       const [ isLoading, setIsLoading ] = React.useState(true);
       const [ isOnboardingCompleted, setIsBoardingCompleted ] = React.useState(true);
       const [userToken, setUserToken] = React.useState(null);
+
+      const [font1Loaded] = useFonts({
+        'Karla': require('./Fonts/LittleLemon_fonts/Fonts/Karla-Regular.ttf'), // Replace with your font 1 file
+      });
+    
+      const [font2Loaded] = useFonts2({
+        'Markazi': require('./Fonts/LittleLemon_fonts/Fonts/MarkaziText-Regular.ttf'), // Replace with your font 2 file
+      });    
 
       const getUserToken = async () => {
         // testing purposes
@@ -44,17 +56,7 @@ import Splash from './screens/Splash';
                   name = "Home" 
                   component={ Home }
                   options={{ 
-                      headerTitle: () => (
-                        <Image style={{ width: 200, height: 55, margin: 10 }} source={require("./assets/Logo.png")}/>                        
-                      ), 
-                      headerRight: () => (
-                        <Image style={{ width: 40, height: 40, borderRadius: 50 }} source={require("./assets/Profile2.png")}/>
-                      ),                        
-                      
-                      headerTitleAlign: 'center',
-                      headerStyle: {
-                        backgroundColor: '#EDEFEE'
-                      } 
+                      headerShown: false,
                     }}                     
                     />
                 ) : (
@@ -106,4 +108,3 @@ import Splash from './screens/Splash';
         );
       }
     
-export default App;
