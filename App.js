@@ -86,22 +86,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
           }  
           Alert.alert("Success", "Successfully saved changes!");
         },
-      }), []);      
-    
-      useEffect(() => {
-        setTimeout(async() => {
-          // setIsLoading(false);
-          let userToken;
-          userToken = null;
-          try {
-            userToken = await AsyncStorage.getItem('userToken');
-          } catch(e) {
-            console.log(e);
-          }
-          // console.log('user token: ', userToken);
-          dispatch({ type: 'signIn', token: userToken });
-        }, 1000);
-      }, []);
+      }), []);    
+      
     
       if( state.isLoading ) {
         return <Splash/>;          
