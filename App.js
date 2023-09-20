@@ -1,57 +1,118 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Onboarding from './screens/Onboarding';
-import { Image, AvtivityIndicator } from 'react-native';
+import { Alert } from "react-native";
 import Home from './screens/Home';
 import Profile from './screens/Profile';
 import Splash from './screens/Splash';
-import * as Font from 'expo-font';
-import { AppLoading } from 'expo';   
+import { AuthContext } from './components/AuthContext';  
 import { useFonts } from '@expo-google-fonts/karla';   
-import { useFonts as useFonts2 } from '@expo-google-fonts/markazi-text';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-      const Stack = createNativeStackNavigator();   
+      const Stack = createNativeStackNavigator();       
+
+      export default function App () {         
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      const [fontsLoaded] = useFonts({
+        'Karla': require('./Fonts/LittleLemon_fonts/Fonts/Karla-Regular.ttf'),
+        'Markazi': require('./Fonts/LittleLemon_fonts/Fonts/MarkaziText-Regular.ttf'),
+      }); 
       
-
-      export default function App () {      
-      const [ isLoading, setIsLoading ] = React.useState(true);
-      const [ isOnboardingCompleted, setIsBoardingCompleted ] = React.useState(true);
-      const [userToken, setUserToken] = React.useState(null);
-
-      const [font1Loaded] = useFonts({
-        'Karla': require('./Fonts/LittleLemon_fonts/Fonts/Karla-Regular.ttf'), // Replace with your font 1 file
-      });
-    
-      const [font2Loaded] = useFonts2({
-        'Markazi': require('./Fonts/LittleLemon_fonts/Fonts/MarkaziText-Regular.ttf'), // Replace with your font 2 file
-      });    
-
-      const getUserToken = async () => {
-        // testing purposes
-        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-        try {
-          // custom logic
-          await sleep(2000);
-          const token = null;
-          setUserToken(token);
-        } finally {
-          setIsLoading(false);
-        }
+      const initialLoginState = {
+        isLoading: true, 
+        isOnboardingCompleted: false,               
       };
 
-      React.useEffect(() => {
-        getUserToken();
-      }, []);
+      useEffect(() => {
+        (async () => {
+          let profileData = [];
+          await sleep(2000);
+          try {
+            const getProfile = await AsyncStorage.getItem("profile");
+            if (getProfile !== null) {
+              profileData = getProfile;              
+            }
+          } catch (e) {
+            console.error(e);
+          } finally {
+            if (Object.keys(profileData).length != 0) {
+              dispatch({ type: "signIn", isOnboardingCompleted: true });
+            } else {
+              dispatch({ type: "signIn", isOnboardingCompleted: false });
+            }
+          }
+        })();
+      }, []);      
 
-        if (isLoading) {
-          return <Splash/>;
-        }
+      const loginReducer = (prevState, action) => {
+        switch( action.type ) {
+          case 'signIn': 
+            return {
+              ...prevState,
+              isOnboardingCompleted: action.isOnboardingCompleted,
+              isLoading: false,
+            };             
+        }             
+      };
+    
+      const [state, dispatch] = React.useReducer(loginReducer, initialLoginState);
+    
+      const authContext = React.useMemo(() => ({
+        signIn: async data => {          
+          try {
+            const jsonValue = JSON.stringify(data)
+            await AsyncStorage.setItem('profile', jsonValue);
+          } catch(e) {
+            console.log(e);
+          }
+          
+          dispatch({ type: 'signIn', isOnboardingCompleted: true });
+        },
+        signOut: async() => {         
+          try {
+            await AsyncStorage.clear();
+          } catch(e) {
+            console.log(e);
+          }
+          dispatch({ type: 'signIn', isOnboardingCompleted: false });
+        },
+        update: async data => {
+          try {
+            const jsonValue = JSON.stringify(data);
+            await AsyncStorage.setItem("profile", jsonValue);
+          } catch (e) {
+            console.error(e);
+          }  
+          Alert.alert("Success", "Successfully saved changes!");
+        },
+      }), []);      
+    
+      useEffect(() => {
+        setTimeout(async() => {
+          // setIsLoading(false);
+          let userToken;
+          userToken = null;
+          try {
+            userToken = await AsyncStorage.getItem('userToken');
+          } catch(e) {
+            console.log(e);
+          }
+          // console.log('user token: ', userToken);
+          dispatch({ type: 'signIn', token: userToken });
+        }, 1000);
+      }, []);
+    
+      if( state.isLoading ) {
+        return <Splash/>;          
+      }
 
         return (
+          <AuthContext.Provider value={authContext}>
           <NavigationContainer>            
               <Stack.Navigator > 
-                {userToken == null ? (              
+                {state.isOnboardingCompleted ? ( 
+                  <>             
                 <Stack.Screen 
                   name = "Home" 
                   component={ Home }
@@ -59,52 +120,26 @@ import { useFonts as useFonts2 } from '@expo-google-fonts/markazi-text';
                       headerShown: false,
                     }}                     
                     />
+                    <Stack.Screen 
+                  name = "Profile" 
+                  component={ Profile }
+                  options={{ 
+                      headerShown: false,
+                    }}                     
+                    /> 
+                    </>
                 ) : (
                 <Stack.Screen 
                   name = "Onboarding" 
                   component={ Onboarding }
                   options={{ 
-                      headerTitle: () => (
-                        <Image style={{ width: 200, height: 55, margin: 10 }} source={require("./assets/Logo.png")}/>
-                      ), 
-                      headerTitleAlign: 'center',
-                      headerStyle: {
-                        backgroundColor: '#EDEFEE'                        
-                      }                      
+                      headerShown: false, 
                     }} />
-                )}
-                <Stack.Screen 
-                  name = "Profile" 
-                  component={ Profile }
-                  options={{ 
-                      headerTitle: () => (
-                        <Image style={{ width: 200, height: 55, margin: 10 }} source={require("./assets/Logo.png")}/>                        
-                      ), 
-                      headerRight: () => (
-                        <Image style={{ width: 40, height: 40, borderRadius: 50 }} source={require("./assets/Profile2.png")}/>
-                      ),                        
-                      
-                      headerTitleAlign: 'center',
-                      headerStyle: {
-                        backgroundColor: '#EDEFEE'
-                      } 
-                    }}                     
-                    /> 
-                   <Stack.Screen 
-                  name = "Onboarding" 
-                  component={ Onboarding }
-                  options={{ 
-                      headerTitle: () => (
-                        <Image style={{ width: 200, height: 55, margin: 10 }} source={require("./assets/Logo.png")}/>
-                      ), 
-                      headerTitleAlign: 'center',
-                      headerStyle: {
-                        backgroundColor: '#EDEFEE'                        
-                      }                      
-                    }} /> 
+                )}                 
                                        
               </Stack.Navigator>              
             </NavigationContainer>
+          </AuthContext.Provider>
         );
       }
     

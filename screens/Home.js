@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Image, Pressable, Alert, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView, SectionList } from 'react-native'
+import { View, Text, StyleSheet, Image, Pressable, Alert, SafeAreaView, SectionList } from 'react-native'
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -7,6 +7,7 @@ import { createTable, getMenuItems, saveMenuItems, filterByQueryAndCategories, }
 import { getSectionListData, useUpdateEffect } from "../utils/utils";
 import debounce from "lodash.debounce";
 import { Searchbar } from "react-native-paper";
+import { useFonts } from '@expo-google-fonts/karla';
 
 const API_URL =
   "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json";
@@ -28,7 +29,7 @@ const Item = ({ name, price, description, image }) => (
   </View>
 );
 
-export default function Home({ navigation }) {
+export default function Home({ navigation }) {  
   const [searchBarText, setSearchBarText] = useState("");
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
@@ -44,6 +45,11 @@ export default function Home({ navigation }) {
       image={item.image}
     />
   );
+
+  const [fontsLoaded] = useFonts({
+    'Karla': require('../Fonts/LittleLemon_fonts/Fonts/Karla-Regular.ttf'),
+    'Markazi': require('../Fonts/LittleLemon_fonts/Fonts/MarkaziText-Regular.ttf'),
+  }); 
 
   const [profile, setProfile] = useState({
     firstName: "",
@@ -121,7 +127,6 @@ export default function Home({ navigation }) {
     setFilterSelections(arrayCopy);
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerImgageContainer}>
@@ -134,7 +139,7 @@ export default function Home({ navigation }) {
             <Image source={{ uri: profile.image }} style={styles.avatarImage} />
           ) : (
             <View style={styles.avatarEmpty}>
-              <Text style={styles.avatarEmpty}>
+              <Text style={styles.avatarEmptyText}>
                 {profile?.firstName && Array.from(profile.firstName)[0]}
                 {profile?.lastName && Array.from(profile.lastName)[0]}
               </Text>
@@ -226,6 +231,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#495E57",
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarEmptyText: {
+    fontSize: 28,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontFamily: 'Markazi',
   },
   searchBar: {
     marginTop: 10,

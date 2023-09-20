@@ -1,66 +1,75 @@
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView, KeyboardAvoidingView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, KeyboardAvoidingView, Image, Platform } from 'react-native';
+import React from 'react';
 import { validateEmail } from '../utils';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-
+import Constants from 'expo-constants';
+import { useFonts } from "expo-font";
+import { AuthContext }  from '../components/AuthContext';
 
 const Onboarding = ({ navigation }) => {
-  const [ email, onChangeEmail ] = React.useState('');
+  const [email, onChangeEmail] = React.useState('');
   const isEmailValid = validateEmail(email);
-  const [ firstName, setFirstName ] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const { signIn } = React.useContext(AuthContext);
 
+  const [fontsLoaded] = useFonts({
+    'Karla': require('../Fonts/LittleLemon_fonts/Fonts/Karla-Regular.ttf'),
+    'Markazi': require('../Fonts/LittleLemon_fonts/Fonts/MarkaziText-Regular.ttf'),
+  }); 
   
-  const setData = async () => {
-    if (firstName.length == 0) {
-      Alert.alert('Please enter First Name')  
-      
-    } else if (!validateEmail(email)) {
-      Alert.alert('Please enter a valid email')
-    } else {
-      try {
-        await AsyncStorage.setItem('FirstName', firstName);
-        await AsyncStorage.setItem('Email', email);
-        navigation.navigate('Home');
-      } catch (error) {
-        console.log(error);
-      } 
-    }
-  }
+  const loginHandle = () => {   
 
-  return ( 
-       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-        <View style={[ {flexDirection: 'column' },]}>          
-          <View style={styles.innerContainer}> 
-             <Text style={styles.messageText}>Let us get to know you</Text>  
-          </View>                             
-          <View style={styles.infoContainer}>
-              <Text style={styles.boxLabel}>First Name</Text>    
-                <TextInput
-                      style={styles.inputBox}
-                      value={firstName}
-                      onChangeText={setFirstName}
-                    />
+    if ( firstName.length == 0 || lastName.length == 0 ) {
+        Alert.alert('Wrong Input!', 'Firstname, Lastname or email fields cannot be empty.', [
+            {text: 'Okay'}
+        ]);   
+        return;             
+    } 
+    if (!validateEmail(email)) {
+      Alert.alert('Wrong Input!', 'Please enter a valid email' , [{text: 'Okay'}]);
+      return;
+     } 
+     signIn({ firstName, lastName, email });
+    }    
 
-              <Text style={styles.boxLabel}>Email</Text>    
-                <TextInput
-                      style={styles.inputBox}
-                      value={email}
-                      onChangeText={onChangeEmail}             
-                    />                 
-            </View>                  
-              
-              <View style={styles.footerContainer}>         
-              
-              <Pressable
-                style={validateEmail(email) ? styles.button : styles.disabled}
-                onPress={ setData }> 
-                <Text style={styles.boxLabel}>Next</Text>               
-              </Pressable>                                     
-            </View>                 
-        </View> 
-     </KeyboardAvoidingView>   
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} >
+      <View style={styles.headerImgageContainer}>
+        <Image style={styles.headerImage} source={require('../assets/Logo.png')} />
+      </View>
+      <View style={[{ flexDirection: 'column' },]}>
+        <View style={styles.innerContainer}>
+          <Text style={styles.messageText}>Let us get to know you</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.boxLabel}>First Name</Text>
+          <TextInput
+            style={styles.inputBox}
+            value={firstName}
+            onChangeText={setFirstName}            
+          />
+          <Text style={styles.boxLabel}>Last Name</Text>
+          <TextInput
+            style={styles.inputBox}
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <Text style={styles.boxLabel}>Email</Text>
+          <TextInput
+            style={styles.inputBox}
+            value={email}
+            onChangeText={onChangeEmail}
+          />
+        </View>
+        <View style={styles.footerContainer}>
+          <Pressable
+            style={validateEmail(email) ? styles.button : styles.disabled}
+            onPress={() => {loginHandle(firstName, lastName, email)}}>              
+            <Text style={styles.boxLabel}>Next</Text>
+          </Pressable>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -68,66 +77,89 @@ export default Onboarding;
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',     
-    flex: 1,                         
-  },  
-  innerContainer: {
-    
-    backgroundColor: '#EDEFEE',     
+    alignItems: 'center',
+    flex: 1,
+    paddingTop: Constants.statusBarHeight,
+  },
+  headerImage: {
+    width: 200,
+    height: 50,
+  },
+  headerImgageContainer: {
     justifyContent: 'center',
-    flex: 1.8,        
-  },  
+    padding: 10,
+    alignItems: 'center',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: 'grey',
+  },
+  header: {
+    fontSize: 18,
+    fontWeight: '500',
+    paddingLeft: 10,
+    paddingTop: 20,
+    color: '#333333',
+  },
+  innerContainer: {
+    backgroundColor: '#EDEFEE',
+    justifyContent: 'center',
+    flex: 1,
+  },
   messageText: {
     fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',     
-    color: '#495e57',   
+    textAlign: 'center',
+    color: '#495e57',
+    fontFamily: 'Markazi',
   },
   inputBox: {
     height: 40,
     width: 350,
-    margin: 20,
+    margin: 15,
     fontSize: 16,
     borderWidth: 2,
-    borderRadius: 14, 
-    paddingHorizontal: 15,        
+    borderRadius: 14,
+    paddingHorizontal: 15,
   },
   boxLabel: {
     fontSize: 20,
     textAlign: 'center',
     color: '#495e57',
+    fontFamily: 'Karla',
+    fontWeight: 'bold',
   },
-  button: {           
+  button: {
     fontSize: 20,
-    marginTop: 30,
     marginRight: 30,
     paddingVertical: 8,
-    width: '30%',    
+    width: '30%',
     backgroundColor: '#F4CE14',
     borderRadius: 10,
-    textAlign: 'center',    
+    textAlign: 'center',
     paddingHorizontal: 5,
-    alignSelf: 'flex-end',   
+    alignSelf: 'flex-end',
+
   },
   disabled: {
-    fontSize: 20,    
+    fontSize: 20,
     marginRight: 30,
-    paddingVertical: 8,    
-    width: '30%',    
+    paddingVertical: 8,
+    width: '30%',
     backgroundColor: '#BFBFBF',
     borderRadius: 10,
-    textAlign: 'center',    
+    textAlign: 'center',
     paddingHorizontal: 5,
-    alignSelf: 'flex-end',    
+    alignSelf: 'flex-end',
   },
   infoContainer: {
-    backgroundColor: '#EDEFEE',      
+    backgroundColor: '#EDEFEE',
     justifyContent: 'flex-start',
-    flex: 3,        
+    flex: 3,
   },
-  footerContainer: {    
-    backgroundColor: '#495E57',    
-    justifyContent: 'center',     
-    flex: 0.9,           
-  },  
+  footerContainer: {
+    backgroundColor: '#495E57',
+    justifyContent: 'flex-start',
+    flex: 1,
+    paddingTop: 20,
+  },
 })
