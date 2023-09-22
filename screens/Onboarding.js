@@ -36,8 +36,7 @@ const Onboarding = ({ navigation }) => {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} >
       <View style={styles.headerImgageContainer}>
         <Image style={styles.headerImage} source={require('../assets/Logo.png')} />
-      </View>
-      <View style={[{ flexDirection: 'column' },]}>
+      </View>      
         <View style={styles.innerContainer}>
           <Text style={styles.messageText}>Let us get to know you</Text>
         </View>
@@ -67,8 +66,7 @@ const Onboarding = ({ navigation }) => {
             onPress={() => {loginHandle(firstName, lastName, email)}}>              
             <Text style={styles.boxLabel}>Next</Text>
           </Pressable>
-        </View>
-      </View>
+        </View>      
     </KeyboardAvoidingView>
   );
 };
@@ -77,9 +75,11 @@ export default Onboarding;
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    flexDirection: 'column',
     flex: 1,
     paddingTop: Constants.statusBarHeight,
+    backgroundColor: '#EDEFEE',    
+    borderWidth: 1,
   },
   headerImage: {
     width: 200,
@@ -87,23 +87,22 @@ const styles = StyleSheet.create({
   },
   headerImgageContainer: {
     justifyContent: 'center',
-    padding: 10,
-    alignItems: 'center',
-    width: '100%',
+    paddingBottom: 10,
+    alignItems: 'center',    
     borderBottomWidth: 1,
     borderBottomColor: 'grey',
   },
   header: {
     fontSize: 18,
-    fontWeight: '500',
-    paddingLeft: 10,
+    fontWeight: '500',    
     paddingTop: 20,
     color: '#333333',
   },
   innerContainer: {
     backgroundColor: '#EDEFEE',
     justifyContent: 'center',
-    flex: 1,
+    backgroundColor: '#EDEFEE',
+    flex: 1,    
   },
   messageText: {
     fontSize: 24,
@@ -114,12 +113,12 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     height: 40,
-    width: 350,
-    margin: 15,
+    marginBottom: 20,
+    marginHorizontal: 15,
     fontSize: 16,
     borderWidth: 2,
     borderRadius: 14,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
   },
   boxLabel: {
     fontSize: 20,
@@ -132,34 +131,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 30,
     paddingVertical: 8,
-    width: '30%',
+    
     backgroundColor: '#F4CE14',
     borderRadius: 10,
     textAlign: 'center',
-    paddingHorizontal: 5,
+    paddingHorizontal: 20,
     alignSelf: 'flex-end',
-
   },
   disabled: {
     fontSize: 20,
     marginRight: 30,
     paddingVertical: 8,
-    width: '30%',
+   
     backgroundColor: '#BFBFBF',
     borderRadius: 10,
     textAlign: 'center',
-    paddingHorizontal: 5,
+    paddingHorizontal: 20,
     alignSelf: 'flex-end',
   },
   infoContainer: {
     backgroundColor: '#EDEFEE',
     justifyContent: 'flex-start',
-    flex: 3,
+    flex: 2,    
   },
   footerContainer: {
     backgroundColor: '#495E57',
-    justifyContent: 'flex-start',
-    flex: 1,
-    paddingTop: 20,
+    justifyContent: 'center',
+    paddingVertical: 20,    
   },
 })
